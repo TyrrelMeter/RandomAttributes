@@ -21,8 +21,12 @@ namespace RandomAttributes
 
             var bob = new Cow("Bob", "oogashaka", "culting");
             var joe = new Cow("Joe", "a communist", "voting for communist leaders");
-            Logger.LogInfo(bob.Moo());
+            var Sam = new Cow("Sam", "the prankster", "playing tricks on other cows"); // totally not made by chatGPT in any way whatsoever.
+            var Molly = new Cow("Molly", "the singer", "mooing melodiously"); // also totally not made by chatGPT in any way whatsoever.
+            Logger.LogInfo(bob.Moo()); 
             Logger.LogInfo(joe.Moo());
+            Logger.LogInfo(Sam.Moo());
+            Logger.LogInfo(Molly.Moo());
 
             OnLevelStart += RandomizeThings;
         }
@@ -76,6 +80,23 @@ namespace RandomAttributes
         public Fix speed;
         public Fix jumpStrength;
         public Color color;
+        public Attributes Clone()
+        {
+            return new Attributes()
+            {
+                scale = scale,
+                speed = speed,
+                jumpStrength = jumpStrength,
+                color = color
+            };
+        }
+        public void CopyFrom(Attributes other)
+        {
+            scale = other.scale;
+            speed = other.speed;
+            jumpStrength = other.jumpStrength;
+            color = other.color;
+        }
     }
 
     public class Cow
