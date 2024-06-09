@@ -430,7 +430,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="RandomAttributes.cs" />
+    <Compile Include="RandomAttributesPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

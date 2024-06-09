@@ -1,15 +1,16 @@
 ﻿using BepInEx;
 using BoplFixedMath;
 using HarmonyLib;
+using System;
 using UnityEngine;
 
-namespace NoGravity
+namespace RandomAttributes
 {
-    [BepInPlugin("com.dogoodogster.randomattributes", "Random Attributes", "1.0.0")]
-    public class RandomAttributes : BaseUnityPlugin
+    [BepInPlugin("com.dogoodogster.randomattributes", "Random Attributes", "1.1.0")]
+    public class RandomAttributesPlugin : BaseUnityPlugin
     {
-        public Harmony harmony;
-        public static RandomAttributes instance;
+        private Harmony harmony;
+        private static RandomAttributesPlugin instance;
         public static Attributes[] attributes = new Attributes[4];
         private void Awake()
         {
@@ -22,22 +23,17 @@ namespace NoGravity
             var joe = new Cow("Joe", "a communist", "voting for communist leaders");
             Logger.LogInfo(bob.Moo());
             Logger.LogInfo(joe.Moo());
+
+            OnLevelStart += RandomizeThings;
         }
+
+        public static event Action OnLevelStart;
 
         [HarmonyPatch(typeof(GameSessionHandler), nameof(GameSessionHandler.Init))]
         [HarmonyPostfix]
-        public static void GameStart()
+        private static void GameStart()
         {
-            for (int i = 0; i < attributes.Length; i++)
-            {
-                attributes[i] = new Attributes()
-                {
-                    scale = Updater.RandomFix((Fix)(-1), (Fix)3),
-                    speed = Updater.RandomFix((Fix)1, (Fix)87.2),
-                    jumpStrength = Updater.RandomFix((Fix)9.3, (Fix)109.8),
-                    color = new Color((float)Updater.RandomFix((Fix)0, (Fix)1), (float)Updater.RandomFix((Fix)0, (Fix)1), (float)Updater.RandomFix((Fix)0, (Fix)1))
-                };
-            }
+            OnLevelStart();
 
             foreach (var player in PlayerHandler.Get().PlayerList())
             {
@@ -46,7 +42,7 @@ namespace NoGravity
         }
         [HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.UpdateSim))]
         [HarmonyPrefix]
-        public static void PlayerPhysicsUpdate(PlayerPhysics __instance, ref IPlayerIdHolder ___playerIdHolder)
+        private static void PlayerPhysicsUpdate(PlayerPhysics __instance, ref IPlayerIdHolder ___playerIdHolder)
         {
             var slimecontroller = __instance.GetComponent<SlimeController>();
 
@@ -59,6 +55,19 @@ namespace NoGravity
                 __instance.jumpStrength = attributes[___playerIdHolder.GetPlayerId() - 1].jumpStrength;
             }
         }
+        public static void RandomizeThings()
+        {
+            for (int i = 0; i < attributes.Length; i++)
+            {
+                attributes[i] = new Attributes()
+                {
+                    scale = Updater.RandomFix((Fix)(-1), (Fix)3),
+                    speed = Updater.RandomFix((Fix)1, (Fix)87.2),
+                    jumpStrength = Updater.RandomFix((Fix)9.3, (Fix)109.8),
+                    color = new Color((float)Updater.RandomFix((Fix)0, (Fix)1), (float)Updater.RandomFix((Fix)0, (Fix)1), (float)Updater.RandomFix((Fix)0, (Fix)1))
+                };
+            }
+        }
     }
 
     public class Attributes
@@ -69,7 +78,7 @@ namespace NoGravity
         public Color color;
     }
 
-    class Cow
+    public class Cow
     {
         public string name;
         public string description;
