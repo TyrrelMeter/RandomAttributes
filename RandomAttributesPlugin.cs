@@ -23,10 +23,14 @@ namespace RandomAttributes
             var joe = new Cow("Joe", "a communist", "voting for communist leaders");
             var Sam = new Cow("Sam", "the prankster", "playing tricks on other cows"); // totally not made by chatGPT in any way whatsoever.
             var Molly = new Cow("Molly", "the singer", "mooing melodiously"); // also totally not made by chatGPT in any way whatsoever.
+            var Kim = new Cow("Kim", "a communist", "being a communist leader"); // <-- fixed missing semicolon and comma
+            var Tim = new Cow("Tim", "a communist", "voting for communist leaders");
             Logger.LogInfo(bob.Moo()); 
             Logger.LogInfo(joe.Moo());
             Logger.LogInfo(Sam.Moo());
             Logger.LogInfo(Molly.Moo());
+            Logger.LogInfo(Kim.Moo());
+            Logger.LogInfo(Tim.Moo());
 
             OnLevelStart += RandomizeThings;
 
@@ -51,6 +55,7 @@ namespace RandomAttributes
                 player.Scale = attributes[player.Id - 1].scale;
             }
         }
+
         [HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.UpdateSim))]
         [HarmonyPrefix]
         private static void PlayerPhysicsUpdate(PlayerPhysics __instance, ref IPlayerIdHolder ___playerIdHolder)
@@ -61,11 +66,15 @@ namespace RandomAttributes
             {
                 slimecontroller.GetPlayerSprite().material.SetColor("_ShadowColor", attributes[___playerIdHolder.GetPlayerId() - 1].color);
 
-
                 __instance.Speed = attributes[___playerIdHolder.GetPlayerId() - 1].speed;
                 __instance.jumpStrength = attributes[___playerIdHolder.GetPlayerId() - 1].jumpStrength;
+
+                // Set gravity using randomized value
+                __instance.gravity_modifier = attributes[___playerIdHolder.GetPlayerId() - 1].gravity;
+                __instance.gravity_accel = attributes[___playerIdHolder.GetPlayerId() - 1].gravity;
             }
         }
+
         public static void RandomizeThings()
         {
             for (int i = 0; i < attributes.Length; i++)
@@ -75,7 +84,8 @@ namespace RandomAttributes
                     scale = Updater.RandomFix((Fix)(-1), (Fix)3),
                     speed = Updater.RandomFix((Fix)1, (Fix)87.2),
                     jumpStrength = Updater.RandomFix((Fix)9.3, (Fix)109.8),
-                    color = new FixColor(Updater.RandomFix((Fix)0, (Fix)1), Updater.RandomFix((Fix)0, (Fix)1), Updater.RandomFix((Fix)0, (Fix)1))
+                    color = new FixColor(Updater.RandomFix((Fix)0, (Fix)1), Updater.RandomFix((Fix)0, (Fix)1), Updater.RandomFix((Fix)0, (Fix)1)),
+                    gravity = Updater.RandomFix((Fix)5, (Fix)30) // <-- ensure gravity is randomized
                 };
             }
         }
@@ -87,6 +97,13 @@ namespace RandomAttributes
         public Fix speed;
         public Fix jumpStrength;
         public FixColor color;
+        public Fix ability;
+        public Fix gravity;
+
+        public override string ToString()
+        {
+            return $"{GetType().Name} {{ scale={scale}, speed={speed}, jumpStrength={jumpStrength}, color={color} }}";
+        }
         public Attributes Clone()
         {
             return new Attributes()
@@ -94,7 +111,8 @@ namespace RandomAttributes
                 scale = scale,
                 speed = speed,
                 jumpStrength = jumpStrength,
-                color = color
+                color = color,
+                gravity = gravity
             };
         }
         public void CopyFrom(Attributes other)
@@ -103,6 +121,7 @@ namespace RandomAttributes
             speed = other.speed;
             jumpStrength = other.jumpStrength;
             color = other.color;
+            gravity = other.gravity;
         }
     }
 
@@ -115,6 +134,11 @@ namespace RandomAttributes
             this.r = r;
             this.g = g;
             this.b = b;
+        }
+
+        public override string ToString()
+        {
+            return $"rgb({(int)(r * (Fix)255)}, {(int)(g * (Fix)255)}, {(int)(b * (Fix)255)})";
         }
 
         public void ToHSV(out Fix h, out Fix s, out Fix v)
@@ -269,4 +293,9 @@ namespace RandomAttributes
             return $"Moo, I am a {speciesName}. my name is {name} and I am described as {description} and my purpose is {purpose}.";
         }
     }
+}
+public class propaganda
+{
+    public string name;
+
 }
